@@ -14,29 +14,130 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const user = JSON.parse(session);
     const allowedRoles = ['admin', 'staff', 'doctor', 'receptionist'];
+
     if (!allowedRoles.includes(user.role)) {
         alert("Access Denied: You do not have permission to view the Command Center.");
         window.location.href = 'index.html';
         return;
     }
 
+    // --- FINAL: Role Permissions Matrix ---
+    const ROLE_PERMISSIONS = {
+        'receptionist': ['appointments', 'scanner'], // QR Scan & Check-in Only
+        'doctor': ['scanner', 'inventory', 'medical-lab'], // Lab Tech: Clinical actions (Can scan but not check-in)
+        'staff': ['scanner', 'inventory', 'medical-lab'], // Same as Lab Tech
+        'admin': ['dashboard', 'scanner', 'inventory', 'broadcast', 'medical-lab', 'staff', 'appointments', 'donors', 'activity-log'] // Full Control
+    };
+
+    // Store permissions globally for showView access
+    window.userPerms = ROLE_PERMISSIONS[user.role] || [];
+
+    // --- UI Role Customization ---
+    document.getElementById('user-display-name').textContent = user.name || 'Staff';
+    document.getElementById('user-display-role').textContent = user.role.toUpperCase();
+
+    // Dynamically Hide Sidebar Items based on permissions
+    document.querySelectorAll('.nav-item').forEach(item => {
+        const onClickAttr = item.getAttribute('onclick');
+        if (onClickAttr) {
+            const match = onClickAttr.match(/'([^']+)'/);
+            if (match && match[1]) {
+                const view = match[1];
+                if (!window.userPerms.includes(view)) {
+                    item.style.display = 'none';
+                }
+            }
+        }
+    });
+
+    // Initial View Selection based on role
+    if (user.role === 'receptionist') window.showView('appointments');
+    else if (user.role === 'doctor' || user.role === 'staff') window.showView('medical-lab');
+    else window.showView('dashboard');
+
     // Initialize Views
     initializeInventoryListener();
+    loadDailyAppointments();
     initializeScanner();
     initializeCharts();
+
+    // Log login session
+    logActivity("LOGIN", "Staff member accessed the system");
 });
 
-// ------ NAVIGATION ------
+// ------ ACTIVITY LOGGING ------
+async function logActivity(action, details) {
+    try {
+        const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+        const session = localStorage.getItem('sharyan_user');
+        const user = session ? JSON.parse(session) : { name: "System", role: "unknown" };
+
+        await addDoc(collection(db, "activity_log"), {
+            timestamp: new Date(),
+            staffName: user.name,
+            staffRole: user.role,
+            action: action,
+            details: details
+        });
+    } catch (e) {
+        console.error("Logging failed:", e);
+    }
+}
+
+async function loadActivityLog() {
+    const logBody = document.getElementById('activity-log-body');
+    if (!logBody) return;
+
+    try {
+        const { query, collection, orderBy, limit, onSnapshot } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+        const q = query(collection(db, "activity_log"), orderBy("timestamp", "desc"), limit(50));
+
+        onSnapshot(q, (snapshot) => {
+            logBody.innerHTML = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const time = data.timestamp?.toDate().toLocaleTimeString() || "---";
+                const row = document.createElement('tr');
+                row.style.borderBottom = "1px solid #f8fafc";
+                row.innerHTML = `
+                    <td style="padding:12px; font-size:12px; color:#64748b;">${time}</td>
+                    <td style="font-weight:600; font-size:13px;">${data.staffName} <span style="font-size:10px; color:#94a3b8;">(${data.staffRole})</span></td>
+                    <td><span style="background:#f1f5f9; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold;">${data.action}</span></td>
+                    <td style="font-size:12px; color:#475569;">${data.details}</td>
+                `;
+                logBody.appendChild(row);
+            });
+        });
+    } catch (e) { console.error(e); }
+}
+
+// ------ NAVIGATION (With Permission Guard) ------
 window.showView = (viewName) => {
+    // Permission Check
+    if (window.userPerms && !window.userPerms.includes(viewName)) {
+        console.warn("Unauthorized view access:", viewName);
+        return;
+    }
+
+    if (viewName === 'staff') loadStaffList();
+    if (viewName === 'activity-log') loadActivityLog();
+
     // Hide all sections
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); // Reset nav
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
     // Show target
-    document.getElementById(`view-${viewName}`).classList.add('active');
+    const target = document.getElementById(`view-${viewName}`);
+    if (target) {
+        target.classList.add('active');
 
-    // Highlight nav
-    // (Simple implementation, ideally match button ID)
+        // Match sidebar highlighting
+        document.querySelectorAll('.nav-item').forEach(btn => {
+            if (btn.getAttribute('onclick').includes(`'${viewName}'`)) {
+                btn.classList.add('active');
+            }
+        });
+    }
 };
 
 window.logout = async () => {
@@ -164,12 +265,7 @@ function showScanResult(user, id) {
 window.confirmDonation = async () => {
     const id = document.getElementById('donor-id').textContent.replace('ID: ', '');
     // In production, we'd have the ID stored in a variable
-    alert(`Donation Confirmed for ID: ${id}. Inventory updating...`);
-
-    // 1. Update Inventory
-    // (Need to know blood type)
-    // 2. Update User Last Donation
-
+    logActivity('DONATION_CONFIRMED', `Linked to ID: ${id}`);
     document.getElementById('scan-result').style.display = 'none';
 };
 
@@ -245,21 +341,19 @@ window.handleAddStaff = async (e) => {
             civilId: civilId,
             role: role,
             uid: uid,
+            status: "active", // Default status
             createdAt: new Date(),
             managedBy: "admin"
         });
 
+        logActivity("STAFF_CREATED", `Added new ${role}: ${name}`);
         alert(`Success! Staff created.\nLogin: ${email}\nPass: ${password}`);
         form.reset();
         loadStaffList(); // Refresh list
 
     } catch (error) {
         console.error("Error adding staff:", error);
-        if (error.code === 'auth/email-already-in-use') {
-            alert("This ID is already registered as a User Account!");
-        } else {
-            alert("Error: " + error.message);
-        }
+        alert("Error: " + error.message);
     }
 };
 
@@ -268,51 +362,38 @@ async function loadStaffList() {
     if (!listContainer) return;
 
     try {
-        const { collection, getDocs, query, where, deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
-
-        // Query for staff roles. Note: Requires Index in Firestore if combining == and in
-        // Simplified query: get all users and filter client side for demo if index missing
+        const { collection, getDocs, query, where } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
         const q = query(collection(db, "users"), where("role", "in", ["admin", "staff", "doctor", "receptionist"]));
 
-        let querySnapshot;
-        try {
-            querySnapshot = await getDocs(q);
-        } catch (idxError) {
-            console.warn("Index missing for role query. Fetching all users (inefficient but works for demo).");
-            const all = await getDocs(collection(db, "users"));
-            // Manually filter
-            const filtered = [];
-            all.forEach(d => {
-                const data = d.data();
-                if (['admin', 'staff', 'doctor', 'receptionist'].includes(data.role)) filtered.push(d);
-            });
-            // Mock snapshot behavior
-            querySnapshot = { empty: filtered.length === 0, forEach: (cb) => filtered.forEach(cb) };
-        }
-
-        listContainer.innerHTML = ''; // Clear
+        const querySnapshot = await getDocs(q);
+        listContainer.innerHTML = '';
 
         if (querySnapshot.empty) {
-            listContainer.innerHTML = '<p>No staff found.</p>';
+            listContainer.innerHTML = '<p style="text-align:center; color:#94a3b8; padding:20px;">No staff registered yet.</p>';
             return;
         }
 
         querySnapshot.forEach((userDoc) => {
             const data = userDoc.data();
+            const isActive = data.status === "active";
             const el = document.createElement('div');
-            el.style.borderBottom = "1px solid #eee";
-            el.style.padding = "10px 0";
-            el.style.display = "flex";
-            el.style.justifyContent = "space-between";
-            el.style.alignItems = "center";
+            el.className = 'staff-list-item';
+            el.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:15px; border-bottom:1px solid #f1f5f9; background:" + (isActive ? "white" : "#f8fafc");
 
             el.innerHTML = `
                 <div>
-                    <div style="font-weight:bold;">${data.name}</div>
-                    <div style="font-size:12px; color:#64748b;">${data.role.toUpperCase()} • ID: ${data.civilId}</div>
-                    <div style="font-size:10px; color:#cbd5e1;">Pass: ${data.password}</div>
+                    <div style="font-weight:700; color:#1e293b;">${data.name}</div>
+                    <div style="font-size:12px; color:#64748b;">${data.role.toUpperCase()} • ${data.email}</div>
+                    <span style="font-size:10px; padding:2px 6px; border-radius:10px; background:${isActive ? "#dcfce7" : "#fee2e2"}; color:${isActive ? "#166534" : "#991b1b"};">
+                        ${isActive ? "ACTIVE" : "DISABLED"}
+                    </span>
                 </div>
-                <button onclick="deleteStaff('${userDoc.id}')" style="background:#fee2e2; color:#dc2626; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">🗑️</button>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="toggleStaffStatus('${userDoc.id}', '${data.status}')" style="background:${isActive ? "#f1f5f9" : "#2563eb"}; color:${isActive ? "#475569" : "white"}; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:11px;">
+                        ${isActive ? "Deactivate" : "Activate"}
+                    </button>
+                    <button onclick="deleteStaff('${userDoc.id}')" style="background:none; border:none; color:#f87171; cursor:pointer; font-size:16px;">🗑️</button>
+                </div>
             `;
             listContainer.appendChild(el);
         });
@@ -323,10 +404,21 @@ async function loadStaffList() {
     }
 }
 
+window.toggleStaffStatus = async (uid, currentStatus) => {
+    const newStatus = currentStatus === "active" ? "disabled" : "active";
+    const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+    try {
+        await updateDoc(doc(db, "users", uid), { status: newStatus });
+        logActivity("STAFF_STATUS_CHANGE", `Staff ID ${uid} changed to ${newStatus}`);
+        loadStaffList();
+    } catch (e) { alert(e.message); }
+};
+
 window.deleteStaff = async (id) => {
-    if (confirm("Are you sure you want to remove this staff access?")) {
+    if (confirm("Permanently delete this staff member? This will remove their login access.")) {
         const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
         await deleteDoc(doc(db, 'users', id));
+        logActivity("STAFF_DELETED", `Removed staff member ${id}`);
         loadStaffList();
     }
 };
@@ -338,4 +430,114 @@ window.showView = (viewName) => {
     if (viewName === 'staff') {
         loadStaffList();
     }
+};
+
+// ------ RECEPTIONIST LOGIC ------
+
+async function loadDailyAppointments() {
+    const tableBody = document.getElementById('daily-appointments-body');
+    if (!tableBody) return;
+
+    try {
+        const { query, collection, where, onSnapshot } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+
+        // Listen for today's pending appointments
+        const q = query(collection(db, "appointments"), where("status", "==", "pending"));
+
+        onSnapshot(q, (snapshot) => {
+            tableBody.innerHTML = '';
+            snapshot.forEach(doc => {
+                const statusClass = data.status === 'pending' ? 'tag-pending' : 'tag-arrived';
+                const row = document.createElement('tr');
+                row.style.borderBottom = "1px solid #f1f5f9";
+                row.innerHTML = `
+                    <td style="padding: 15px;">
+                        <div style="font-weight:700;">${data.donorName}</div>
+                        <div style="font-size:11px; color:#64748b;">Slot: Today, Morning</div>
+                    </td>
+                    <td><span class="blood-badge-small" style="background:#fee2e2; color:#dc2626; padding:4px 10px; border-radius:6px; font-weight:800;">${data.bloodType}</span></td>
+                    <td>
+                        <span style="padding:4px 8px; border-radius:6px; font-size:11px; font-weight:bold; background:#f1f5f9; color:#475569;">
+                            ${data.status.toUpperCase()}
+                        </span>
+                    </td>
+                    <td>
+                        <button onclick="checkInDonor('${doc.id}')" style="background:#10b981; color:white; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:600; transition:0.2s;">
+                            Check In ✅
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            if (snapshot.empty) {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#94a3b8;">No pending appointments.</td></tr>';
+            }
+        });
+    } catch (e) { console.error(e); }
+}
+
+window.checkInDonor = async (appointmentId) => {
+    try {
+        const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+        await updateDoc(doc(db, "appointments", appointmentId), {
+            status: "arrived",
+            arrivedAt: new Date()
+        });
+        await logActivity("CHECK_IN", `Donor with appointment ${appointmentId} checked in`);
+        alert("Donor checked in! Proceed to Medical Evaluation.");
+    } catch (e) { alert("Error: " + e.message); }
+};
+
+
+// ------ MEDICAL / LAB LOGIC ------
+
+window.handleMedicalSubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const bagId = document.getElementById('med-bag-id').value;
+    const uid = document.getElementById('med-donor-uid').value;
+    const bloodType = document.getElementById('med-blood-type').value;
+
+    if (!uid) { return alert("Please scan a donor first!"); }
+
+    try {
+        const { addDoc, collection, updateDoc, doc, increment } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+
+        // 1. Save Medical Record
+        await addDoc(collection(db, "donation_records"), {
+            bagId: bagId,
+            donorUid: uid,
+            bloodType: bloodType,
+            weight: document.getElementById('med-weight').value,
+            hemoglobin: document.getElementById('med-hb').value,
+            volume: document.getElementById('med-volume').value,
+            notes: document.getElementById('med-notes').value,
+            timestamp: new Date(),
+            verified: false
+        });
+
+        // 2. Update Inventory
+        const invId = bloodType.replace('+', '_POS').replace('-', '_NEG');
+        await updateDoc(doc(db, "inventory", invId), {
+            units: increment(1),
+            lastUpdated: new Date()
+        });
+
+        await logActivity("BLOOD_COLLECTED", `Bag ${bagId} for ${bloodType} added to stock`);
+        alert("Success! Blood Bag Registered & Inventory Updated.");
+        form.reset();
+        document.getElementById('med-donor-name').value = '';
+        document.getElementById('med-donor-uid').value = '';
+
+    } catch (error) {
+        alert("Error saving record: " + error.message);
+    }
+};
+
+// --- Updated Scanner Integration ---
+window.fillMedicalForm = (name, uid, btype) => {
+    document.getElementById('med-donor-name').value = name;
+    document.getElementById('med-donor-uid').value = uid;
+    document.getElementById('med-blood-type').value = btype;
+    window.showView('medical-lab');
 };

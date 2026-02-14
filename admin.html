@@ -25,32 +25,40 @@
             </div>
 
             <nav class="nav-menu">
-                <button class="nav-item active" onclick="showView('dashboard')">
-                    <span class="icon">📊</span> Dashboard
+                <!-- Shared by Admin/Receptionist -->
+                <button class="nav-item active receptionist-item" onclick="showView('appointments')">
+                    <span class="icon">📅</span> Daily Appointments
                 </button>
-                <button class="nav-item" onclick="showView('scanner')">
+                <button class="nav-item receptionist-item" onclick="showView('scanner')">
                     <span class="icon">📷</span> Smart Scanner
                 </button>
-                <button class="nav-item" onclick="showView('inventory')">
+
+                <!-- Shared by Admin/Doctor/Lab -->
+                <button class="nav-item lab-item" onclick="showView('inventory')">
                     <span class="icon">🩸</span> Inventory Control
                 </button>
-                <button class="nav-item" onclick="showView('broadcast')">
-                    <span class="icon">📢</span> Emergency Broadcast
+                <button class="nav-item lab-item" onclick="showView('medical-lab')">
+                    <span class="icon">🔬</span> Medical Evaluation
                 </button>
-                <button class="nav-item" onclick="showView('donors')">
-                    <span class="icon">👥</span> Donor Records
+
+                <!-- Admin Only -->
+                <button class="nav-item admin-item" onclick="showView('dashboard')">
+                    <span class="icon">📊</span> Market Hub
                 </button>
-                <button class="nav-item" onclick="showView('staff')">
-                    <span class="icon">👔</span> Manage Staff
+                <button class="nav-item admin-item" onclick="showView('staff')">
+                    <span class="icon">👔</span> Staff Management
+                </button>
+                <button class="nav-item admin-item" onclick="showView('activity-log')">
+                    <span class="icon">📜</span> Activity Log
                 </button>
             </nav>
 
             <div class="sidebar-footer">
                 <div class="admin-user">
-                    <div class="avatar">👨‍⚕️</div>
+                    <div class="avatar">🩺</div>
                     <div class="info">
-                        <div class="name">Dr. Ayman</div>
-                        <div class="role">Super Admin</div>
+                        <div class="name" id="user-display-name">Dr. Ayman</div>
+                        <div class="role" id="user-display-role">Super Admin</div>
                     </div>
                 </div>
                 <button class="logout-btn" onclick="logout()">Logout</button>
@@ -60,53 +68,90 @@
         <!-- Main Content Area -->
         <main class="main-content">
 
-            <!-- VIEW: Staff Management -->
-            <section id="view-staff" class="view-section">
+            <!-- VIEW: Appointments (Receptionist) -->
+            <section id="view-appointments" class="view-section active">
                 <header class="section-header">
-                    <h1>Manage Hospital Staff</h1>
+                    <h1>Daily Appointments List</h1>
+                    <p>Manage today's expected donors and check-ins</p>
+                </header>
+                <div class="stat-card">
+                    <div id="appointments-list-container">
+                        <!-- Dynamically Populated List -->
+                        <table class="staff-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="text-align: left; border-bottom: 2px solid #e2e8f0;">
+                                    <th style="padding: 12px;">Donor Name</th>
+                                    <th>Blood Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="daily-appointments-body">
+                                <!-- JS Injection -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: Medical Lab (Doctor/Lab Tech) -->
+            <section id="view-medical-lab" class="view-section">
+                <header class="section-header">
+                    <h1>Medical Evaluation & Withdrawal</h1>
+                    <p>Enter clinical data and assign blood bag IDs</p>
                 </header>
 
-                <div class="scanner-layout"> <!-- Reusing grid layout -->
-                    <!-- Add Staff Form -->
+                <div class="scanner-layout">
                     <div class="stat-card">
-                        <h3>🆕 Add New Employee</h3>
-                        <form id="addStaffForm" onsubmit="handleAddStaff(event)">
+                        <h3>🩸 Blood Collection Form</h3>
+                        <form id="medicalForm" onsubmit="handleMedicalSubmit(event)">
                             <div class="form-group">
-                                <label>Full Name</label>
-                                <input type="text" name="name" class="form-control" placeholder="Dr. Ahmed..." required>
+                                <label>Donor Name (Verified)</label>
+                                <input type="text" id="med-donor-name" class="form-control" readonly>
+                                <input type="hidden" id="med-donor-uid">
                             </div>
-                            <div class="form-group">
-                                <label>Email Address</label>
-                                <input type="email" name="email" class="form-control" placeholder="doctor@sharyan.com"
-                                    required>
+                            <div class="grid-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div class="form-group">
+                                    <label>Bag Serial Number (QR)</label>
+                                    <input type="text" id="med-bag-id" class="form-control" placeholder="BAG-123456"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Blood Type</label>
+                                    <input type="text" id="med-blood-type" class="form-control" readonly>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>National/Civil ID</label>
-                                <input type="text" name="id" class="form-control" placeholder="For records..." required>
+                            <div class="grid-form"
+                                style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top:10px;">
+                                <div class="form-group">
+                                    <label>Weight (kg)</label>
+                                    <input type="number" id="med-weight" class="form-control" placeholder="50+"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Hemoglobin (g/dL)</label>
+                                    <input type="number" step="0.1" id="med-hb" class="form-control" placeholder="12.5+"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Collected Vol (ml)</label>
+                                    <input type="number" id="med-volume" class="form-control" value="450">
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>Initial Password</label>
-                                <input type="text" name="password" class="form-control" value="Staff123" required>
+                            <div class="form-group" style="margin-top:10px;">
+                                <label>Clinical Notes</label>
+                                <textarea id="med-notes" class="form-control" style="height: 60px;"></textarea>
                             </div>
-                            <div class="form-group">
-                                <label>Assign Role</label>
-                                <select name="role" class="form-control">
-                                    <option value="receptionist">Receptionist (Scanner Only)</option>
-                                    <option value="doctor">Doctor (Inventory & Check)</option>
-                                    <option value="admin">Super Admin (Full Access)</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn-confirm" style="width:100%; margin-top:10px;">Create
-                                Account</button>
+                            <button type="submit" class="btn-confirm" style="width:100%; margin-top:20px;">✅ Finalize &
+                                Update Stock</button>
                         </form>
                     </div>
 
-                    <!-- Staff List -->
-                    <div class="stat-card">
-                        <h3>📋 Current Staff List</h3>
-                        <div id="staff-list-container" style="max-height: 400px; overflow-y: auto;">
-                            <!-- Staff items injected here -->
-                            <p style="color:#94a3b8; text-align:center;">Loading staff...</p>
+                    <div class="stat-card" style="background: #eff6ff; border: 1px dashed #2563eb;">
+                        <h3>🔬 Ready for Processing</h3>
+                        <p style="font-size: 13px; color: #64748b;">Awaiting lab results for safety verification</p>
+                        <div id="pending-verification-list">
+                            <!-- Injected -->
                         </div>
                     </div>
                 </div>
@@ -207,6 +252,80 @@
 
                 <div class="inventory-grid" id="admin-inventory-grid">
                     <!-- Injected by JS -->
+                </div>
+            </section>
+
+            <!-- VIEW: Staff Management (Admin Only) -->
+            <section id="view-staff" class="view-section">
+                <header class="section-header">
+                    <h1>Staff Management</h1>
+                    <p>Add, monitor, and manage hospital personnel</p>
+                </header>
+
+                <div class="scanner-layout">
+                    <div class="stat-card">
+                        <h3>🆕 Add New Staff</h3>
+                        <form id="addStaffForm" onsubmit="handleAddStaff(event)">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" name="name" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Official Email</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Work ID / Civil ID</label>
+                                <input type="text" name="id" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Assign Role</label>
+                                <select name="role" class="form-control">
+                                    <option value="receptionist">Receptionist (Check-in Only)</option>
+                                    <option value="doctor">Medical Lab / Doctor (Evaluation)</option>
+                                    <option value="admin">Super Admin (Full Access)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="text" name="password" class="form-control" value="Staff123" required>
+                            </div>
+                            <button type="submit" class="btn-confirm" style="width:100%; margin-top:10px;">Create
+                                Account</button>
+                        </form>
+                    </div>
+
+                    <div class="stat-card">
+                        <h3>📋 Personnel Directory</h3>
+                        <div id="staff-list-container" style="max-height: 500px; overflow-y: auto;">
+                            <!-- Staff List Injected Here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: Activity Log (Admin Only) -->
+            <section id="view-activity-log" class="view-section">
+                <header class="section-header">
+                    <h1>System Activity Log</h1>
+                    <p>Real-time tracking of every operation in the system</p>
+                </header>
+                <div class="stat-card">
+                    <div id="activity-log-container" style="max-height: 600px; overflow-y: auto;">
+                        <table class="staff-table" style="width:100%;">
+                            <thead>
+                                <tr style="text-align:left; border-bottom: 2px solid #eee;">
+                                    <th style="padding:10px;">Time</th>
+                                    <th>Staff Member</th>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activity-log-body">
+                                <!-- Logs Injected Here -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 

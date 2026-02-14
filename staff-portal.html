@@ -10,82 +10,94 @@
     <link rel="stylesheet" href="extended-styles.css">
     <style>
         body {
-            background: #0f172a;
+            background: #f0f7ff;
+            /* Clinical Light Blue */
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', 'Tajawal', sans-serif;
+            margin: 0;
         }
 
         .staff-gateway {
             background: white;
-            padding: 40px;
-            border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 48px;
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             width: 100%;
-            max-width: 400px;
-            text-align: center;
+            max-width: 450px;
+            border-top: 6px solid #2563eb;
+            /* Staff Blue Border */
         }
 
         .staff-logo {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 800;
+            color: #1e40af;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .staff-logo span {
             color: #dc2626;
-            margin-bottom: 30px;
         }
 
         .staff-form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             text-align: left;
         }
 
         .staff-form-group label {
             display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #475569;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e293b;
             margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .staff-input {
+        .staff-input,
+        .staff-select {
             width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s ease;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.2s;
             box-sizing: border-box;
+            background: #f8fafc;
         }
 
-        .staff-input:focus {
+        .staff-input:focus,
+        .staff-select:focus {
             outline: none;
-            border-color: #dc2626;
-            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
         }
 
         .staff-btn {
             width: 100%;
-            padding: 14px;
-            background: #dc2626;
+            padding: 16px;
+            background: #2563eb;
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
+            margin-top: 10px;
         }
 
         .staff-btn:hover {
-            background: #b91c1c;
+            background: #1e40af;
             transform: translateY(-1px);
-        }
-
-        .staff-footer {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #94a3b8;
         }
     </style>
 </head>
@@ -102,32 +114,45 @@
         }
     </script>
     <div class="staff-gateway">
-        <div class="staff-logo">🩸 Pulse Control</div>
-        <h2 style="font-size: 20px; color: #1e293b; margin-bottom: 10px;">Hospital Staff Log-in</h2>
-        <p style="color: #64748b; font-size: 14px; margin-bottom: 30px;">Authorized Access Only</p>
+        <div class="staff-logo"><span>🩸</span> SHARYAN PORTAL</div>
+        <h2 style="font-size: 18px; color: #475569; margin-bottom: 32px; text-align: center;">Medical Staff
+            Authentication</h2>
 
         <form id="staffLoginForm" onsubmit="handleStaffLogin(event)">
             <div class="staff-form-group">
-                <label>Staff Email</label>
-                <input type="email" id="staffEmail" class="staff-input" placeholder="doctor@sharyan.com" required>
+                <label>Work Email</label>
+                <input type="email" id="staffEmail" class="staff-input" placeholder="e.g. j.doe@hospital.com" required>
             </div>
             <div class="staff-form-group">
                 <label>Security Password</label>
                 <input type="password" id="staffPassword" class="staff-input" placeholder="••••••••" required>
             </div>
-            <button type="submit" class="staff-btn">Access Command Center</button>
+            <div class="staff-form-group">
+                <label>Department</label>
+                <select id="staffDept" class="staff-select" required>
+                    <option value="" disabled selected>Select your unit...</option>
+                    <option value="reception">Front Desk / Reception</option>
+                    <option value="lab">Hematology Lab / Doctor</option>
+                    <option value="admin">Administration</option>
+                </select>
+            </div>
+            <button type="submit" class="staff-btn">Authenticate & Access</button>
         </form>
 
         <div class="staff-footer">
             &copy; 2026 Sharyan Health Group. All rights reserved.
+            <div style="margin-top: 10px;">
+                <a href="javascript:void(0)" onclick="setupFirstAdmin()"
+                    style="color: #cbd5e1; text-decoration: none; font-size: 10px;">System Setup (One-time)</a>
+            </div>
         </div>
     </div>
 
     <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
         // Reuse config
         const firebaseConfig = {
@@ -143,6 +168,30 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // --- NEW: Admin Setup Logic ---
+        window.setupFirstAdmin = async () => {
+            const email = prompt("Enter email for FIRST Admin:", "admin@sharyan.com");
+            const pass = prompt("Enter password:", "Admin12345");
+            if (!email || !pass) return;
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                const uid = userCredential.user.uid;
+
+                await setDoc(doc(db, "users", uid), {
+                    name: "System Admin",
+                    email: email,
+                    role: "admin",
+                    uid: uid,
+                    createdAt: new Date()
+                });
+
+                alert("✅ Admin Account Created! You can now log in.");
+            } catch (error) {
+                alert("Setup Failed (Maybe account already exists?): " + error.message);
+            }
+        };
+
         window.handleStaffLogin = async (e) => {
             e.preventDefault();
             const email = document.getElementById('staffEmail').value;
@@ -155,11 +204,21 @@
 
                 // 2. Check if user is actually staff/admin
                 const userDoc = await getDoc(doc(db, "users", uid));
-                if (userDoc.exists() && ['admin', 'doctor', 'staff', 'receptionist'].includes(userDoc.data().role)) {
+                const userData = userDoc.data();
+
+                if (userDoc.exists() && ['admin', 'doctor', 'staff', 'receptionist'].includes(userData.role)) {
+
+                    // CHECK FOR DISABLED STATUS
+                    if (userData.status === 'disabled') {
+                        alert("Access Denied: Your staff account has been deactivated. Please contact the Super Admin.");
+                        await auth.signOut();
+                        return;
+                    }
+
                     localStorage.setItem('sharyan_user', JSON.stringify({
                         loggedIn: true,
                         uid: uid,
-                        ...userDoc.data()
+                        ...userData
                     }));
                     window.location.href = 'admin.html';
                 } else {
