@@ -22,13 +22,13 @@
                 <div class="logo-icon">🩸</div>
                 <span class="brand-name">LifeDrop</span>
             </div>
-            <div class="nav-menu" id="navMenu">
-                <a href="#home" class="nav-link active">Home</a>
-                <a href="#about" class="nav-link">About Hospital</a>
-                <a href="#guide" class="nav-link">Donor Guide</a>
-                <a href="#inventory" class="nav-link">Live Inventory</a>
-                <a href="#dashboard" class="nav-link">My Dashboard</a>
-                <a href="#request" class="nav-link emergency-link">🚨 Request Blood</a>
+            <div class="nav-links" id="navMenu">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#inventory" class="nav-link">Inventory</a>
+                <a href="#donor-dashboard" class="nav-link">Dashboard</a>
+                <a href="#emergency" class="nav-link">Emergency</a>
+                <button onclick="handleLogout()" class="nav-btn logout-btn-hero"
+                    style="background: transparent; border: 1px solid #dc2626; color: #dc2626; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-left: 10px;">Logout</button>
             </div>
             <button class="mobile-toggle" id="mobileToggle">
                 <span></span>
@@ -303,17 +303,17 @@
                 <div class="dashboard-card impact-card">
                     <h3>Your Impact</h3>
                     <div class="impact-visual">
-                        <div class="lives-saved-number">12</div>
+                        <div class="lives-saved-number" id="stats-lives-saved">0</div>
                         <div class="impact-label">Lives Saved</div>
                     </div>
                     <div class="impact-details">
                         <div class="impact-item">
                             <span>Total Donations</span>
-                            <strong>4</strong>
+                            <strong id="stats-total-donations">0</strong>
                         </div>
                         <div class="impact-item">
                             <span>Blood Type</span>
-                            <strong>O+</strong>
+                            <strong id="stats-blood-type">--</strong>
                         </div>
                     </div>
                 </div>
@@ -322,18 +322,18 @@
                     <h3>Next Donation Eligibility</h3>
                     <div class="countdown">
                         <div class="countdown-item">
-                            <div class="countdown-number">45</div>
+                            <div class="countdown-number" id="stats-days-left">--</div>
                             <div class="countdown-label">Days</div>
                         </div>
                         <div class="countdown-item">
-                            <div class="countdown-number">12</div>
+                            <div class="countdown-number" id="stats-hours-left">--</div>
                             <div class="countdown-label">Hours</div>
                         </div>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width: 50%"></div>
+                        <div class="progress-fill" id="stats-progress-fill" style="width: 0%"></div>
                     </div>
-                    <p class="eligibility-text">You can donate again on <strong>March 30, 2026</strong></p>
+                    <p class="eligibility-text" id="stats-eligibility-msg">Loading eligibility status...</p>
                 </div>
 
                 <div class="dashboard-card badges-card">

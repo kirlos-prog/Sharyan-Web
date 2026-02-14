@@ -9,7 +9,7 @@ const db = window.sharyan.db;
 document.addEventListener('DOMContentLoaded', () => {
     const session = localStorage.getItem('sharyan_user');
     if (!session) {
-        window.location.href = 'login.html';
+        window.location.href = 'staff-portal.html';
         return;
     }
     const user = JSON.parse(session);
@@ -39,9 +39,19 @@ window.showView = (viewName) => {
     // (Simple implementation, ideally match button ID)
 };
 
-window.logout = () => {
-    localStorage.removeItem('sharyan_user');
-    window.location.href = 'login.html';
+window.logout = async () => {
+    if (confirm("Logout from Command Center?")) {
+        try {
+            const { signOut } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js");
+            const auth = window.sharyan.auth;
+            if (auth) await signOut(auth);
+            localStorage.removeItem('sharyan_user');
+            window.location.href = 'staff-portal.html';
+        } catch (error) {
+            localStorage.removeItem('sharyan_user');
+            window.location.href = 'staff-portal.html';
+        }
+    }
 };
 
 // ------ INVENTORY CONTROL ------

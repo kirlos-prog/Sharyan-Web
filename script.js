@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeFormHandling();
     updateNavbarOnScroll();
     initializeRequestForm();
+    loadDonationHistory(user.uid); // 📅 Load user history
 });
 
 // Digital ID Logic
@@ -61,6 +62,23 @@ function downloadIdCard() {
     // In a real app, this would use html2canvas or similar
     alert('ID Card image saved to your gallery! (Simulation)');
 }
+
+// 🔓 LOGOUT LOGIC
+window.handleLogout = async () => {
+    if (confirm("Are you sure you want to logout?")) {
+        try {
+            const { signOut } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js");
+            const auth = window.sharyan.auth;
+            await signOut(auth);
+            localStorage.removeItem('sharyan_user');
+            window.location.href = 'login.html';
+        } catch (error) {
+            console.error("Logout Error:", error);
+            localStorage.removeItem('sharyan_user');
+            window.location.href = 'login.html';
+        }
+    }
+};
 
 
 // 🔥 REAL-TIME FIREBASE INVENTORY
@@ -278,11 +296,17 @@ function initializeFormHandling() {
                 const { collection, addDoc } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
                 const db = window.sharyan.db;
 
+                // Get current user for linking
+                const userSession = localStorage.getItem('sharyan_user');
+                const user = userSession ? JSON.parse(userSession) : {};
+
                 await addDoc(collection(db, "appointments"), {
-                    donorName: data.name || "Anonymous",
-                    bloodType: data.bloodType || "Unknown",
+                    donorName: data.name || user.name || "Anonymous",
+                    donor_uid: user.uid || null, // Link to user
+                    bloodType: data.bloodType || user.bloodType || "Unknown",
                     date: data.date,
                     status: "pending",
+                    location: "Sharyan Central", // Default for demo
                     createdAt: new Date()
                 });
 
@@ -423,3 +447,87 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+// 📅 LOAD REAL DONATION HISTORY & STATS
+async function loadDonationHistory(uid) {
+    const tableBody = document.getElementById('historyTableBody');
+    if (!tableBody) return;
+
+    try {
+        const { collection, query, where, getDocs } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+        const db = window.sharyan.db;
+
+        const q = query(collection(db, "appointments"), where("donor_uid", "==", uid));
+        const querySnapshot = await getDocs(q);
+
+        const records = [];
+        querySnapshot.forEach(doc => records.push(doc.data()));
+
+        // Sort by date descending
+        records.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        // 1. Update Table
+        tableBody.innerHTML = '';
+        if (records.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#64748b; padding:20px;">No records found. Start your journey today!</td></tr>`;
+        } else {
+            records.forEach(data => {
+                const row = document.createElement('tr');
+                const statusClass = data.status === 'completed' ? 'success' : 'pending';
+                row.innerHTML = `
+                    <td>${data.date}</td>
+                    <td>${data.location || 'Sharyan Central'}</td>
+                    <td>450 ml</td>
+                    <td><span class="status-badge ${statusClass}">${data.status.toUpperCase()}</span></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 2. Update Impact Stats
+        const totalDonations = records.filter(r => r.status === 'completed').length;
+        document.getElementById('stats-total-donations').textContent = totalDonations;
+        document.getElementById('stats-lives-saved').textContent = totalDonations * 3;
+
+        const userSession = JSON.parse(localStorage.getItem('sharyan_user') || '{}');
+        document.getElementById('stats-blood-type').textContent = userSession.bloodType || '--';
+
+        // 3. Update Eligibility (90-day rule)
+        const lastDonation = records.find(r => r.status === 'completed');
+        const eligibilityMsg = document.getElementById('stats-eligibility-msg');
+        const daysLeftEl = document.getElementById('stats-days-left');
+        const hoursLeftEl = document.getElementById('stats-hours-left');
+        const progressFill = document.getElementById('stats-progress-fill');
+
+        if (!lastDonation) {
+            eligibilityMsg.innerHTML = '<span style="color:#10b981; font-weight:bold;">✅ You are eligible to donate today!</span>';
+            daysLeftEl.textContent = '0';
+            hoursLeftEl.textContent = '0';
+            progressFill.style.width = '100%';
+        } else {
+            const lastDate = new Date(lastDonation.date);
+            const nextDate = new Date(lastDate);
+            nextDate.setDate(lastDate.getDate() + 90);
+
+            const now = new Date();
+            const diffTime = nextDate - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays <= 0) {
+                eligibilityMsg.innerHTML = '<span style="color:#10b981; font-weight:bold;">✅ You are eligible to donate now!</span>';
+                daysLeftEl.textContent = '0';
+                hoursLeftEl.textContent = '0';
+                progressFill.style.width = '100%';
+            } else {
+                daysLeftEl.textContent = diffDays;
+                hoursLeftEl.textContent = '12'; // Placeholder for precision
+                eligibilityMsg.innerHTML = `Next eligible date: <strong>${nextDate.toLocaleDateString()}</strong>`;
+
+                const progress = Math.min(100, Math.max(0, ((90 - diffDays) / 90) * 100));
+                progressFill.style.width = `${progress}%`;
+            }
+        }
+
+    } catch (error) {
+        console.error("Error loading history & stats:", error);
+    }
+}

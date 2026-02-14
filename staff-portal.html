@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Portal | Sharyan Command Center</title>
+    <!-- Same premium styles for consistency -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="extended-styles.css">
+    <style>
+        body {
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .staff-gateway {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .staff-logo {
+            font-size: 32px;
+            font-weight: 800;
+            color: #dc2626;
+            margin-bottom: 30px;
+        }
+
+        .staff-form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .staff-form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .staff-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .staff-input:focus {
+            outline: none;
+            border-color: #dc2626;
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
+        }
+
+        .staff-btn {
+            width: 100%;
+            padding: 14px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .staff-btn:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        .staff-footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        const session = localStorage.getItem('sharyan_user');
+        if (session) {
+            const user = JSON.parse(session);
+            const staffRoles = ['admin', 'doctor', 'staff', 'receptionist'];
+            if (staffRoles.includes(user.role)) {
+                window.location.href = 'admin.html';
+            }
+        }
+    </script>
+    <div class="staff-gateway">
+        <div class="staff-logo">🩸 Pulse Control</div>
+        <h2 style="font-size: 20px; color: #1e293b; margin-bottom: 10px;">Hospital Staff Log-in</h2>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 30px;">Authorized Access Only</p>
+
+        <form id="staffLoginForm" onsubmit="handleStaffLogin(event)">
+            <div class="staff-form-group">
+                <label>Staff Email</label>
+                <input type="email" id="staffEmail" class="staff-input" placeholder="doctor@sharyan.com" required>
+            </div>
+            <div class="staff-form-group">
+                <label>Security Password</label>
+                <input type="password" id="staffPassword" class="staff-input" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="staff-btn">Access Command Center</button>
+        </form>
+
+        <div class="staff-footer">
+            &copy; 2026 Sharyan Health Group. All rights reserved.
+        </div>
+    </div>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+        // Reuse config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBW3KvfjW3QnkfCa9LbtouiJl4_sqzi9Xg",
+            authDomain: "sharyan-web.firebaseapp.com",
+            projectId: "sharyan-web",
+            storageBucket: "sharyan-web.firebasestorage.app",
+            messagingSenderId: "385590049253",
+            appId: "1:385590049253:web:d062f8dc5a01611610d70c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.handleStaffLogin = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('staffEmail').value;
+            const password = document.getElementById('staffPassword').value;
+
+            try {
+                // 1. Sign in
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const uid = userCredential.user.uid;
+
+                // 2. Check if user is actually staff/admin
+                const userDoc = await getDoc(doc(db, "users", uid));
+                if (userDoc.exists() && ['admin', 'doctor', 'staff', 'receptionist'].includes(userDoc.data().role)) {
+                    localStorage.setItem('sharyan_user', JSON.stringify({
+                        loggedIn: true,
+                        uid: uid,
+                        ...userDoc.data()
+                    }));
+                    window.location.href = 'admin.html';
+                } else {
+                    alert("Unauthorized access. This area is for hospital staff only.");
+                    await auth.signOut();
+                }
+            } catch (error) {
+                alert("Login Failed: " + error.message);
+            }
+        };
+    </script>
+</body>
+
+</html>

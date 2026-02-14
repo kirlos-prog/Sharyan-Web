@@ -195,6 +195,17 @@
 
 <body class="login-page">
 
+    <script>
+        // Check if already logged in as a donor
+        const session = localStorage.getItem('sharyan_user');
+        if (session) {
+            const user = JSON.parse(session);
+            const staffRoles = ['admin', 'doctor', 'staff', 'receptionist'];
+            if (!staffRoles.includes(user.role)) {
+                window.location.href = 'index.html#dashboard';
+            }
+        }
+    </script>
     <div class="gateway-container">
         <!-- Visual Side (Introduction) -->
         <div class="gateway-visual">
@@ -231,9 +242,10 @@
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('login')">Login</button>
                 <button class="tab-btn" onclick="switchTab('signup')">New Donor</button>
-                <a href="admin.html"
-                    style="margin-left:auto; font-size:12px; color:#94a3b8; text-decoration:none; padding-top:10px;">🏥
-                    Staff Portal</a>
+                <a href="staff-portal.html"
+                    style="margin-left: auto; font-size: 13px; color: #64748b; text-decoration: none; display: flex; align-items: center; gap: 5px; font-weight: 500;">
+                    <span style="font-size: 16px;">🏥</span> Staff Access
+                </a>
             </div>
 
             <!-- Login Form -->
@@ -376,7 +388,7 @@
                     if (staffRoles.includes(userData.role)) {
                         window.location.href = 'admin.html';
                     } else {
-                        window.location.href = 'index.html';
+                        window.location.href = 'index.html#dashboard';
                     }
                 } else {
                     showToast("Login Error", "Profile not found. Contact Admin.", true);
