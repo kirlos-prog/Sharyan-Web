@@ -453,7 +453,7 @@ async function loadDailyAppointments() {
                 row.innerHTML = `
                     <td style="padding: 15px;">
                         <div style="font-weight:700;">${data.donorName}</div>
-                        <div style="font-size:11px; color:#64748b;">Slot: Today, Morning</div>
+                        <div style="font-size:11px; color:#64748b;">${data.location} | ${data.timeSlot}</div>
                     </td>
                     <td><span class="blood-badge-small" style="background:#fee2e2; color:#dc2626; padding:4px 10px; border-radius:6px; font-weight:800;">${data.bloodType}</span></td>
                     <td>
@@ -503,20 +503,27 @@ window.handleMedicalSubmit = async (e) => {
     try {
         const { addDoc, collection, updateDoc, doc, increment } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
 
-        // 1. Save Medical Record
+        // 1. Save Medical Unit Record
         await addDoc(collection(db, "donation_records"), {
-            bagId: bagId,
+            unitSerial: bagId,
             donorUid: uid,
             bloodType: bloodType,
             weight: document.getElementById('med-weight').value,
             hemoglobin: document.getElementById('med-hb').value,
             volume: document.getElementById('med-volume').value,
+            expiryDate: document.getElementById('med-expiry').value,
+            storageLocation: document.getElementById('med-storage').value,
             notes: document.getElementById('med-notes').value,
             timestamp: new Date(),
             verified: false
         });
 
-        // 2. Update Inventory
+        // 2. Update Donor's Last Donation Date (CRITICAL for Eligibility)
+        await updateDoc(doc(db, "users", uid), {
+            lastDonation: new Date()
+        });
+
+        // 3. Update Inventory (Incremental count)
         const invId = bloodType.replace('+', '_POS').replace('-', '_NEG');
         await updateDoc(doc(db, "inventory", invId), {
             units: increment(1),
@@ -540,4 +547,31 @@ window.fillMedicalForm = (name, uid, btype) => {
     document.getElementById('med-donor-uid').value = uid;
     document.getElementById('med-blood-type').value = btype;
     window.showView('medical-lab');
+};
+window.handleBroadcast = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const btype = form.querySelector('input[name="btype"]:checked')?.value;
+    const urgency = form.querySelector('select').value;
+
+    if (!btype) return alert("Select blood type!");
+
+    try {
+        const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+
+        await addDoc(collection(db, "emergency_alerts"), {
+            bloodType: btype,
+            urgency: urgency,
+            location: "Sharyan Central Hospital",
+            timestamp: new Date(),
+            active: true
+        });
+
+        logActivity("SOS_ALERT", `Broadcasted ${urgency} request for ${btype}`);
+        alert("🚨 EMERGENCY SOS BROADCASTED! Donors are being notified.");
+        form.reset();
+
+    } catch (error) {
+        alert("Broadcast failed: " + error.message);
+    }
 };

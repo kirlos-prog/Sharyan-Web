@@ -302,11 +302,12 @@ function initializeFormHandling() {
 
                 await addDoc(collection(db, "appointments"), {
                     donorName: data.name || user.name || "Anonymous",
-                    donor_uid: user.uid || null, // Link to user
+                    donor_uid: user.uid || null,
                     bloodType: data.bloodType || user.bloodType || "Unknown",
                     date: data.date,
+                    timeSlot: data.timeSlot || "Morning",
+                    location: data.location || "Sharyan Central Hospital",
                     status: "pending",
-                    location: "Sharyan Central", // Default for demo
                     createdAt: new Date()
                 });
 
@@ -510,19 +511,23 @@ async function loadDonationHistory(uid) {
 
             const now = new Date();
             const diffTime = nextDate - now;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-            if (diffDays <= 0) {
+            if (diffTime <= 0) {
                 eligibilityMsg.innerHTML = '<span style="color:#10b981; font-weight:bold;">✅ You are eligible to donate now!</span>';
-                daysLeftEl.textContent = '0';
-                hoursLeftEl.textContent = '0';
+                daysLeftEl.textContent = '00';
+                hoursLeftEl.textContent = '00';
                 progressFill.style.width = '100%';
             } else {
-                daysLeftEl.textContent = diffDays;
-                hoursLeftEl.textContent = '12'; // Placeholder for precision
-                eligibilityMsg.innerHTML = `Next eligible date: <strong>${nextDate.toLocaleDateString()}</strong>`;
+                const totalHours = Math.floor(diffTime / (1000 * 60 * 60));
+                const days = Math.floor(totalHours / 24);
+                const hours = totalHours % 24;
 
-                const progress = Math.min(100, Math.max(0, ((90 - diffDays) / 90) * 100));
+                daysLeftEl.textContent = days.toString().padStart(2, '0');
+                hoursLeftEl.textContent = hours.toString().padStart(2, '0');
+
+                eligibilityMsg.innerHTML = `Recovery in progress. Next eligible: <strong>${nextDate.toLocaleDateString()}</strong>`;
+
+                const progress = Math.min(100, Math.max(0, ((90 - (diffTime / (1000 * 86400))) / 90) * 100));
                 progressFill.style.width = `${progress}%`;
             }
         }

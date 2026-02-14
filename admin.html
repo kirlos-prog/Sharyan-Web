@@ -138,9 +138,22 @@
                                     <input type="number" id="med-volume" class="form-control" value="450">
                                 </div>
                             </div>
+                            <div class="grid-form"
+                                style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top:10px;">
+                                <div class="form-group">
+                                    <label>Expiry Date</label>
+                                    <input type="date" id="med-expiry" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Storage Location (Unit/Fridge)</label>
+                                    <input type="text" id="med-storage" class="form-control"
+                                        placeholder="Fridge A - Shelf 2" required>
+                                </div>
+                            </div>
                             <div class="form-group" style="margin-top:10px;">
-                                <label>Clinical Notes</label>
-                                <textarea id="med-notes" class="form-control" style="height: 60px;"></textarea>
+                                <label>Clinical Notes / Observation</label>
+                                <textarea id="med-notes" class="form-control" rows="3"
+                                    placeholder="Any complications during withdrawal..."></textarea>
                             </div>
                             <button type="submit" class="btn-confirm" style="width:100%; margin-top:20px;">✅ Finalize &
                                 Update Stock</button>

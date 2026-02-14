@@ -414,6 +414,10 @@
             const bloodType = document.getElementById('regBloodType').value;
             const password = document.getElementById('regPassword').value;
 
+            // NEW FIELDS
+            const phone = e.target.querySelector('input[type="tel"]').value;
+            const medicalNotes = e.target.querySelector('textarea').value;
+
             if (age < 18) {
                 showToast("Age Restriction", "Sorry, donors must be 18 years or older.", true);
                 return;
@@ -432,12 +436,14 @@
                 // 2. Create Public Profile in Firestore
                 const userData = {
                     name: name,
-                    email: email, // Save email in profile too
+                    email: email,
                     civilId: civilId,
+                    phone: phone,
                     age: age,
                     bloodType: bloodType,
+                    medicalNotes: medicalNotes,
                     role: 'donor',
-                    uid: uid, // Link to Auth
+                    uid: uid,
                     createdAt: new Date(),
                     lastDonation: null
                 };
