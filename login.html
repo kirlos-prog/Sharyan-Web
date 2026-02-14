@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharyan (شريان) - Save a Life</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Specific Override for Login Page to match "Clean Medical" Request */
+        body.login-page {
+            background-color: #f8f9fa;
+            /* Off-white medical background */
+            background-image: none;
+            color: #1a1a2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .gateway-container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.05);
+            /* Soft premium shadow */
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        .gateway-visual {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e2e8f0 100%);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Abstract Heart Pulse Animation */
+        .pulse-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(220, 38, 38, 0.05);
+            position: absolute;
+            animation: gatewayPulse 3s infinite;
+        }
+
+        .pulse-circle:nth-child(2) {
+            animation-delay: 1s;
+            width: 300px;
+            height: 300px;
+        }
+
+        .pulse-circle:nth-child(3) {
+            animation-delay: 2s;
+            width: 400px;
+            height: 400px;
+        }
+
+        @keyframes gatewayPulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        .gateway-form-section {
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #dc2626;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .tab-btn {
+            padding: 10px 0;
+            background: none;
+            border: none;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #dc2626;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #dc2626;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .gateway-input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .gateway-input:focus {
+            border-color: #dc2626;
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.05);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(220, 38, 38, 0.2);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .gateway-container {
+                grid-template-columns: 1fr;
+            }
+
+            .gateway-visual {
+                display: none;
+            }
+
+            .gateway-form-section {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body class="login-page">
+
+    <div class="gateway-container">
+        <!-- Visual Side (Introduction) -->
+        <div class="gateway-visual">
+            <div class="pulse-circle"></div>
+            <div class="pulse-circle"></div>
+            <div class="pulse-circle"></div>
+
+            <div style="position: relative; z-index: 10;">
+                <div style="font-size: 64px; margin-bottom: 20px;">🩸</div>
+                <h1 style="color: #1a1a2e; font-size: 32px; margin-bottom: 16px;">One Donation.<br>Three Lives.</h1>
+                <p style="color: #64748b; line-height: 1.6; max-width: 300px; margin: 0 auto;">
+                    Join our community of heroes. Your blood donation is a direct lifeline for patients in critical
+                    need.
+                </p>
+                <div style="margin-top: 40px; display: flex; gap: 20px; justify-content: center;">
+                    <div style="text-align: center;">
+                        <strong style="display: block; font-size: 24px; color: #dc2626;">50k+</strong>
+                        <span style="font-size: 12px; color: #64748b;">Donors</span>
+                    </div>
+                    <div style="text-align: center;">
+                        <strong style="display: block; font-size: 24px; color: #dc2626;">15k+</strong>
+                        <span style="font-size: 12px; color: #64748b;">Lives Saved</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Side -->
+        <div class="gateway-form-section">
+            <div class="brand-logo">
+                🩸 Sharyan
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+                <button class="tab-btn" onclick="switchTab('signup')">New Donor</button>
+                <a href="admin.html"
+                    style="margin-left:auto; font-size:12px; color:#94a3b8; text-decoration:none; padding-top:10px;">🏥
+                    Staff Portal</a>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label style="display: block; margin-bottom: 8px; font-size: 14px; color: #64748b;">Civil ID (الرقم
+                        المدني)</label>
+                    <input type="text" placeholder="Enter your 12-digit ID" class="gateway-input" required
+                        pattern="[0-9]{12,14}" title="Please enter 12-14 digits">
+                </div>
+                <div class="input-group">
+                    <label style="display: block; margin-bottom: 8px; font-size: 14px; color: #64748b;">Password</label>
+                    <input type="password" placeholder="••••••••" class="gateway-input" required>
+                </div>
+                <div style="text-align: right; margin-bottom: 20px;">
+                    <a href="#" style="font-size: 12px; color: #dc2626; text-decoration: none;">Forgot Password?</a>
+                </div>
+                <button type="submit" class="submit-btn">Login to Dashboard</button>
+            </form>
+
+            <!-- Sign Up Form -->
+            <form id="signupForm" class="hidden" onsubmit="handleSignup(event)">
+                <div class="input-group">
+                    <input type="text" id="regName" placeholder="Full Name" class="gateway-input" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="input-group">
+                        <input type="text" id="regCivilId" placeholder="Civil ID" class="gateway-input" required
+                            pattern="[0-9]{12,14}">
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="regAge" placeholder="Age" class="gateway-input" required min="18"
+                            max="65">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="input-group">
+                        <input type="tel" placeholder="Mobile Number" class="gateway-input" required>
+                    </div>
+                    <div class="input-group">
+                        <select id="regBloodType" class="gateway-input" required style="background-image: none;">
+                            <option value="">Blood Type</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <textarea placeholder="Medical Notes (Chronic diseases, medications...)" class="gateway-input"
+                        rows="2"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">Register & Get Digital ID</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast (Hidden by default) -->
+    <div id="toast"
+        style="position: fixed; top: 20px; right: 20px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); display: none; z-index: 1000; border-left: 4px solid #dc2626; max-width: 350px;">
+        <h4 id="toastTitle" style="margin: 0 0 5px 0; color: #1a1a2e;">Notification</h4>
+        <p id="toastMessage" style="margin: 0; color: #64748b; font-size: 14px;"></p>
+    </div>
+
+    <script type="module" src="firebase-init.js"></script>
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (tab === 'login') {
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('signupForm').classList.add('hidden');
+            } else {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('signupForm').classList.remove('hidden');
+            }
+        }
+
+        function showToast(title, message, isError = false) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastMessage').textContent = message;
+            toast.style.borderLeftColor = isError ? '#dc2626' : '#10b981';
+            toast.style.display = 'block';
+
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 5000);
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const civilId = document.querySelector('input[placeholder="Enter your 12-digit ID"]').value;
+            const password = document.querySelector('input[type="password"]').value;
+
+            try {
+                const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+                const db = window.sharyan.db;
+
+                // Check Firestore for this user
+                const userDoc = await getDoc(doc(db, "users", civilId));
+
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    // Simple password check (In production: Use Firebase Auth!)
+                    if (userData.password === password) {
+                        localStorage.setItem('sharyan_user', JSON.stringify({
+                            loggedIn: true,
+                            ...userData
+                        }));
+
+                        // Smart Routing based on Role 🧠
+                        const staffRoles = ['admin', 'doctor', 'staff', 'receptionist'];
+                        if (staffRoles.includes(userData.role)) {
+                            window.location.href = 'admin.html'; // Go to Command Center
+                        } else {
+                            window.location.href = 'index.html'; // Go to Donor Dashboard
+                        }
+                    } else {
+                        showToast("Login Failed", "Incorrect password.", true);
+                    }
+                } else {
+                    showToast("Login Failed", "User not found. Please register.", true);
+                }
+            } catch (error) {
+                console.error("Login Error:", error);
+                showToast("System Error", "Could not connect to database.", true);
+            }
+        }
+
+        async function handleSignup(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('regName').value;
+            const civilId = document.getElementById('regCivilId').value;
+            const age = parseInt(document.getElementById('regAge').value);
+            const bloodType = document.getElementById('regBloodType').value;
+            const password = "password123"; // simulating password for now since form doesn't have it
+
+            if (age < 18) {
+                showToast("Age Restriction", "Sorry, donors must be 18 years or older.", true);
+                return;
+            }
+
+            try {
+                const { setDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+                const db = window.sharyan.db;
+
+                // Create User in Firestore (ID = Civil ID)
+                const userData = {
+                    name: name,
+                    civilId: civilId,
+                    age: age,
+                    bloodType: bloodType,
+                    password: password, // Demo only
+                    role: 'donor',
+                    createdAt: new Date(),
+                    lastDonation: null
+                };
+
+                await setDoc(doc(db, "users", civilId), userData);
+
+                // Save session
+                localStorage.setItem('sharyan_user', JSON.stringify({ loggedIn: true, ...userData }));
+
+                // Redirect
+                window.location.href = 'index.html?view=digital-id';
+
+            } catch (error) {
+                console.error("Signup Error:", error);
+                showToast("Registration Failed", "Could not save user. Check console.", true);
+            }
+        }
+
+        // Check for existing session
+        if (localStorage.getItem('sharyan_user')) {
+            // User is already logged in
+            // window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>

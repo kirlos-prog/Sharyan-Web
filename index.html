@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Save lives through blood donation. Track your impact, book appointments, and help those in urgent need.">
+    <title>Blood Donation Hospital - Save Lives Today</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <div class="logo-icon">🩸</div>
+                <span class="brand-name">LifeDrop</span>
+            </div>
+            <div class="nav-menu" id="navMenu">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#about" class="nav-link">About Hospital</a>
+                <a href="#guide" class="nav-link">Donor Guide</a>
+                <a href="#inventory" class="nav-link">Live Inventory</a>
+                <a href="#dashboard" class="nav-link">My Dashboard</a>
+                <a href="#request" class="nav-link emergency-link">🚨 Request Blood</a>
+            </div>
+            <button class="mobile-toggle" id="mobileToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-background">
+            <div class="blood-drop drop-1"></div>
+            <div class="blood-drop drop-2"></div>
+            <div class="blood-drop drop-3"></div>
+        </div>
+        <div class="container hero-content">
+            <h1 class="hero-title">
+                <span class="title-line">Every Drop</span>
+                <span class="title-line gradient-text">Saves a Life</span>
+            </h1>
+            <p class="hero-subtitle">من شريان لـ شريان.. حياة بتكمل. Your donation can save up to 3 lives.
+            </p>
+            <div class="hero-cta">
+                <button class="btn btn-primary btn-large" onclick="scrollToSection('request')">
+                    <span>🚨 Donate Now</span>
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </button>
+                <button class="btn btn-secondary btn-large" onclick="scrollToSection('inventory')">View
+                    Inventory</button>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <div class="stat-number" data-target="15420">0</div>
+                    <div class="stat-label">Lives Saved</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" data-target="5140">0</div>
+                    <div class="stat-label">Active Donors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" data-target="892">0</div>
+                    <div class="stat-label">Units Available</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Hospital Section -->
+    <section class="section about-section" id="about">
+        <div class="container">
+            <h2 class="section-title">About Our Hospital</h2>
+            <p class="section-subtitle">Committed to saving lives through excellence in blood donation services</p>
+
+            <div class="about-grid">
+                <div class="about-card vision-card">
+                    <div class="about-icon">🎯</div>
+                    <h3>Our Vision</h3>
+                    <p>To be the leading blood donation center providing safe, accessible, and high-quality blood
+                        services to save lives across our community.</p>
+                </div>
+
+                <div class="about-card mission-card">
+                    <div class="about-icon">❤️</div>
+                    <h3>Our Mission</h3>
+                    <p>To ensure a sustainable blood supply through voluntary donations, maintaining the highest
+                        standards of quality and safety for both donors and recipients.</p>
+                </div>
+
+                <div class="about-card quality-card">
+                    <div class="about-icon">🔒</div>
+                    <h3>Quality & Safety</h3>
+                    <p>All blood donations undergo rigorous testing and screening. We follow international health
+                        standards to ensure every unit is safe for transfusion.</p>
+                    <ul class="quality-list">
+                        <li>✓ WHO-certified testing procedures</li>
+                        <li>✓ State-of-the-art storage facilities</li>
+                        <li>✓ Trained medical professionals</li>
+                        <li>✓ 24/7 emergency response</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="stats-banner">
+                <div class="banner-stat">
+                    <div class="banner-number">15</div>
+                    <div class="banner-label">Years of Service</div>
+                </div>
+                <div class="banner-stat">
+                    <div class="banner-number">50K+</div>
+                    <div class="banner-label">Registered Donors</div>
+                </div>
+                <div class="banner-stat">
+                    <div class="banner-number">99.9%</div>
+                    <div class="banner-label">Safety Rate</div>
+                </div>
+                <div class="banner-stat">
+                    <div class="banner-number">24/7</div>
+                    <div class="banner-label">Availability</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Donor Guide Section -->
+    <section class="section guide-section" id="guide">
+        <div class="container">
+            <h2 class="section-title">Donor Guide</h2>
+            <p class="section-subtitle">Everything you need to know about blood donation</p>
+
+            <div class="guide-container">
+                <div class="guide-card eligibility-requirements">
+                    <h3>📋 Eligibility Requirements</h3>
+                    <div class="requirements-grid">
+                        <div class="requirement-item">
+                            <div class="req-icon">⚖️</div>
+                            <div class="req-content">
+                                <strong>Weight</strong>
+                                <p>Minimum 50 kg (110 lbs)</p>
+                            </div>
+                        </div>
+                        <div class="requirement-item">
+                            <div class="req-icon">🎂</div>
+                            <div class="req-content">
+                                <strong>Age</strong>
+                                <p>Between 18-65 years</p>
+                            </div>
+                        </div>
+                        <div class="requirement-item">
+                            <div class="req-icon">💪</div>
+                            <div class="req-content">
+                                <strong>Health</strong>
+                                <p>Good overall health</p>
+                            </div>
+                        </div>
+                        <div class="requirement-item">
+                            <div class="req-icon">🩺</div>
+                            <div class="req-content">
+                                <strong>Hemoglobin</strong>
+                                <p>Adequate levels</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guide-card before-donation">
+                    <h3>✅ Before Donation</h3>
+                    <ul class="guide-checklist">
+                        <li>
+                            <span class="check-icon">💧</span>
+                            <div>
+                                <strong>Stay Hydrated</strong>
+                                <p>Drink 3-4 glasses of water before donation</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="check-icon">🍽️</span>
+                            <div>
+                                <strong>Eat Well</strong>
+                                <p>Have a healthy meal 3 hours before</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="check-icon">😴</span>
+                            <div>
+                                <strong>Get Rest</strong>
+                                <p>Ensure 6-8 hours of sleep</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="check-icon">🚫</span>
+                            <div>
+                                <strong>Avoid Alcohol</strong>
+                                <p>No alcohol 24 hours before</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="guide-card after-donation">
+                    <h3>💚 After Donation</h3>
+                    <ul class="guide-checklist">
+                        <li>
+                            <span class="check-icon">🧃</span>
+                            <div>
+                                <strong>Drink Fluids</strong>
+                                <p>Extra fluids for next 24 hours</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="check-icon">🪑</span>
+                            <div>
+                                <strong>Rest</strong>
+                                <p>Relax for 10-15 minutes</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="check-icon">🏋️</span>
+                            <div>
+                                <strong>Avoid Heavy Activity</strong>
+                                <p>No strenuous exercise for 24 hours</p>
+                            </div>
+                        </li>
+                        <li>
+                            <span class="check-icon">🩹</span>
+                            <div>
+                                <strong>Keep Bandage</strong>
+                                <p>Leave bandage on for 4-5 hours</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="guide-card donation-process">
+                    <h3>🔄 The Donation Process</h3>
+                    <div class="process-timeline">
+                        <div class="timeline-step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <strong>Registration</strong>
+                                <p>Submit your details and medical history</p>
+                            </div>
+                        </div>
+                        <div class="timeline-step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <strong>Health Screening</strong>
+                                <p>Quick check-up and blood pressure test</p>
+                            </div>
+                        </div>
+                        <div class="timeline-step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <strong>Donation</strong>
+                                <p>10-15 minutes of donation time</p>
+                            </div>
+                        </div>
+                        <div class="timeline-step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <strong>Refreshments</strong>
+                                <p>Rest and enjoy snacks provided</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blood Inventory Section -->
+    <section class="section inventory-section" id="inventory">
+        <div class="container">
+            <h2 class="section-title">Live Blood Inventory</h2>
+            <p class="section-subtitle">Real-time availability of blood units by type</p>
+
+            <div class="inventory-grid" id="inventoryGrid">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section class="section dashboard-section" id="dashboard">
+        <div class="container">
+            <h2 class="section-title">Donor Dashboard</h2>
+            <p class="section-subtitle">Track your donation journey and achievements</p>
+
+            <div class="dashboard-grid-main">
+                <div class="dashboard-card impact-card">
+                    <h3>Your Impact</h3>
+                    <div class="impact-visual">
+                        <div class="lives-saved-number">12</div>
+                        <div class="impact-label">Lives Saved</div>
+                    </div>
+                    <div class="impact-details">
+                        <div class="impact-item">
+                            <span>Total Donations</span>
+                            <strong>4</strong>
+                        </div>
+                        <div class="impact-item">
+                            <span>Blood Type</span>
+                            <strong>O+</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card eligibility-card">
+                    <h3>Next Donation Eligibility</h3>
+                    <div class="countdown">
+                        <div class="countdown-item">
+                            <div class="countdown-number">45</div>
+                            <div class="countdown-label">Days</div>
+                        </div>
+                        <div class="countdown-item">
+                            <div class="countdown-number">12</div>
+                            <div class="countdown-label">Hours</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 50%"></div>
+                    </div>
+                    <p class="eligibility-text">You can donate again on <strong>March 30, 2026</strong></p>
+                </div>
+
+                <div class="dashboard-card badges-card">
+                    <h3>🏆 Your Achievements</h3>
+                    <div class="badges-grid">
+                        <div class="badge badge-active">
+                            <div class="badge-icon">🥉</div>
+                            <div class="badge-name">Bronze Donor</div>
+                            <div class="badge-desc">3+ donations</div>
+                        </div>
+                        <div class="badge badge-locked">
+                            <div class="badge-icon">🥈</div>
+                            <div class="badge-name">Silver Donor</div>
+                            <div class="badge-desc">10+ donations</div>
+                        </div>
+                        <div class="badge badge-locked">
+                            <div class="badge-icon">🥇</div>
+                            <div class="badge-name">Gold Donor</div>
+                            <div class="badge-desc">25+ donations</div>
+                        </div>
+                        <div class="badge badge-locked">
+                            <div class="badge-icon">💎</div>
+                            <div class="badge-name">Diamond Donor</div>
+                            <div class="badge-desc">50+ donations</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="donation-history-section">
+                <h3>📅 Donation History</h3>
+                <div class="history-table-wrapper">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Location</th>
+                                <th>Amount (ml)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td>2025-11-20</td>
+                                <td>Sharyan Central</td>
+                                <td>450 ml</td>
+                                <td><span class="status-badge success">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td>2025-08-15</td>
+                                <td>Sharyan Central</td>
+                                <td>450 ml</td>
+                                <td><span class="status-badge success">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td>2025-05-10</td>
+                                <td>Sharyan North</td>
+                                <td>450 ml</td>
+                                <td><span class="status-badge success">Completed</span></td>
+                            </tr>
+                            <tr>
+                                <td>2025-02-05</td>
+                                <td>Sharyan Central</td>
+                                <td>450 ml</td>
+                                <td><span class="status-badge success">Completed</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="qr-section">
+                <div class="dashboard-card qr-card">
+                    <h3>Digital Donor Card</h3>
+                    <div class="qr-code">
+                        <div class="qr-placeholder">
+                            <svg viewBox="0 0 100 100">
+                                <rect x="10" y="10" width="15" height="15" fill="#1a1a2e" />
+                                <rect x="30" y="10" width="15" height="15" fill="#1a1a2e" />
+                                <rect x="50" y="10" width="15" height="15" fill="#1a1a2e" />
+                                <rect x="70" y="10" width="15" height="15" fill="#1a1a2e" />
+                                <rect x="10" y="30" width="15" height="15" fill="#1a1a2e" />
+                                <rect x="70" y="30" width="15" height="15" fill="#1a1a2e" />
+                                <rect x="10" y="50" width="15" height="15" fill="#1a1a2e" />
+                                <rect x="30" y="50" width="15" height="15" fill="#1a1a2e" />
+                                <rect x="50" y="50" width="15" height="15" fill="#1a1a2e" />
+                                <rect x="70" y="50" width="15" height="15" fill="#1a1a2e" />
+                                <rect x="10" y="70" width="15" height="15" fill="#1a1a2e" />
+                                <rect x="30" y="70" width="15" height="15" fill="#1a1a2e" />
+                                <rect x="50" y="70" width="15" height="15" fill="#1a1a2e" />
+                                <rect x="70" y="70" width="15" height="15" fill="#1a1a2e" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p>Use this for quick check-in at the hospital</p>
+                    <button class="btn btn-secondary btn-small">Download Card</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Request Blood Section -->
+    <section class="section request-section" id="request">
+        <div class="container">
+            <h2 class="section-title">🚨 Emergency Blood Request</h2>
+            <p class="section-subtitle">Quick request form for critical blood needs</p>
+
+            <div class="request-container">
+                <div class="request-form-wrapper">
+                    <form class="request-form" id="requestForm">
+                        <div class="form-group">
+                            <label>Hospital/Patient Name</label>
+                            <input type="text" required placeholder="Enter name">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Contact Number</label>
+                                <input type="tel" required placeholder="+1234567890">
+                            </div>
+                            <div class="form-group">
+                                <label>Blood Type Needed</label>
+                                <select required>
+                                    <option value="">Select Type</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Units Required</label>
+                                <input type="number" required placeholder="1" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Urgency Level</label>
+                                <select required>
+                                    <option value="">Select Level</option>
+                                    <option value="critical">🔴 Critical (< 1 hour)</option>
+                                    <option value="urgent">🟠 Urgent (< 6 hours)</option>
+                                    <option value="moderate">🟡 Moderate (< 24 hours)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Location/Hospital</label>
+                            <input type="text" required placeholder="Hospital address">
+                        </div>
+                        <div class="form-group">
+                            <label>Additional Information</label>
+                            <textarea rows="3" placeholder="Any additional details..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-emergency btn-large btn-block">
+                            <span>Submit Emergency Request</span>
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M20 6L9 17l-5-5" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+                <div class="request-info">
+                    <div class="alert-box critical">
+                        <div class="alert-icon">⚡</div>
+                        <h4>Emergency Protocol</h4>
+                        <p>Our team will immediately notify matching donors in your area. You'll receive confirmation
+                            within 15 minutes.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">📞</div>
+                        <h3>24/7 Hotline</h3>
+                        <p class="hotline-number">+1-800-BLOOD-911</p>
+                        <p>For immediate assistance</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">⏱️</div>
+                        <h3>Average Response</h3>
+                        <p><strong>5-15 minutes</strong></p>
+                        <p>For critical requests</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-logo">🩸 Sharyan</div>
+            <p>&copy; 2026 Sharyan Blood Donation Platform. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Digital ID Modal (Hidden by default) -->
+    <div id="digitalIdModal" class="modal-overlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 15, 30, 0.95); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(10px);">
+        <div class="digital-id-card"
+            style="background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); width: 350px; border-radius: 20px; overflow: hidden; box-shadow: 0 0 50px rgba(220, 38, 38, 0.3); position: relative; animation: slideUp 0.5s ease;">
+
+            <!-- Card Header -->
+            <div style="background: #dc2626; padding: 20px; text-align: center; color: white;">
+                <div style="font-size: 24px; font-weight: 800; margin-bottom: 5px;">🩸 Sharyan</div>
+                <div style="font-size: 16px; font-family: 'Arial', sans-serif;">شريان</div>
+                <div style="font-size: 10px; letter-spacing: 1px; opacity: 0.9; margin-top: 5px;">OFFICIAL DONOR ID
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div style="padding: 30px; text-align: center;">
+
+                <!-- QR Code Container -->
+                <div
+                    style="background: white; padding: 15px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; border: 2px dashed #dc2626;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Sharyan-User-12345"
+                        alt="Donor QR Code" width="150" height="150">
+                </div>
+
+                <h3 id="idName" style="color: #1a1a2e; margin: 0 0 5px 0; font-size: 20px;">Ahmed Hassan</h3>
+                <p id="idCivil" style="color: #64748b; font-size: 14px; margin: 0 0 15px 0;">ID: 2950101123456</p>
+
+                <div style="display: flex; justify-content: center; gap: 15px;">
+                    <div
+                        style="background: #fee2e2; color: #dc2626; padding: 8px 16px; border-radius: 8px; font-weight: 700;">
+                        Type: <span id="idBlood">A+</span>
+                    </div>
+                    <div
+                        style="background: #ecfccb; color: #4d7c0f; padding: 8px 16px; border-radius: 8px; font-weight: 700;">
+                        Active
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Footer -->
+            <div
+                style="padding: 20px; border-top: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 10px;">
+                <button onclick="downloadIdCard()"
+                    style="background: #1a1a2e; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">
+                    💾 Save to Mobile
+                </button>
+                <button onclick="closeDigitalId()"
+                    style="background: transparent; color: #64748b; border: none; padding: 8px; font-size: 14px; cursor: pointer;">
+                    Close & Go to Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="firebase-init.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

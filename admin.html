@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharyan Pulse Command Center | مركز إدارة شريان</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="admin.css">
+    <!-- QR Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="admin-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">🩸 Pulse Command</div>
+                <div class="subtitle">مركز إدارة شريان</div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" onclick="showView('dashboard')">
+                    <span class="icon">📊</span> Dashboard
+                </button>
+                <button class="nav-item" onclick="showView('scanner')">
+                    <span class="icon">📷</span> Smart Scanner
+                </button>
+                <button class="nav-item" onclick="showView('inventory')">
+                    <span class="icon">🩸</span> Inventory Control
+                </button>
+                <button class="nav-item" onclick="showView('broadcast')">
+                    <span class="icon">📢</span> Emergency Broadcast
+                </button>
+                <button class="nav-item" onclick="showView('donors')">
+                    <span class="icon">👥</span> Donor Records
+                </button>
+                <button class="nav-item" onclick="showView('staff')">
+                    <span class="icon">👔</span> Manage Staff
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="admin-user">
+                    <div class="avatar">👨‍⚕️</div>
+                    <div class="info">
+                        <div class="name">Dr. Ayman</div>
+                        <div class="role">Super Admin</div>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+
+            <!-- VIEW: Staff Management -->
+            <section id="view-staff" class="view-section">
+                <header class="section-header">
+                    <h1>Manage Hospital Staff</h1>
+                </header>
+
+                <div class="scanner-layout"> <!-- Reusing grid layout -->
+                    <!-- Add Staff Form -->
+                    <div class="stat-card">
+                        <h3>🆕 Add New Employee</h3>
+                        <form id="addStaffForm" onsubmit="handleAddStaff(event)">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" name="name" class="form-control" placeholder="Dr. Ahmed..." required>
+                            </div>
+                            <div class="form-group">
+                                <label>Login ID (Civil ID)</label>
+                                <input type="text" name="id" class="form-control"
+                                    placeholder="Employee ID used for login" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Initial Password</label>
+                                <input type="text" name="password" class="form-control" value="Staff123" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Assign Role</label>
+                                <select name="role" class="form-control">
+                                    <option value="receptionist">Receptionist (Scanner Only)</option>
+                                    <option value="doctor">Doctor (Inventory & Check)</option>
+                                    <option value="admin">Super Admin (Full Access)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-confirm" style="width:100%; margin-top:10px;">Create
+                                Account</button>
+                        </form>
+                    </div>
+
+                    <!-- Staff List -->
+                    <div class="stat-card">
+                        <h3>📋 Current Staff List</h3>
+                        <div id="staff-list-container" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Staff items injected here -->
+                            <p style="color:#94a3b8; text-align:center;">Loading staff...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: Dashboard Overview -->
+            <section id="view-dashboard" class="view-section active">
+                <header class="section-header">
+                    <h1>Real-Time Overview</h1>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Today's Donations</h3>
+                        <div class="value" id="stat-today">12</div>
+                        <div class="trend up">▲ 20% vs yesterday</div>
+                    </div>
+                    <div class="stat-card critical">
+                        <h3>Critical Alerts</h3>
+                        <div class="value" id="stat-critical">3</div>
+                        <div class="trend">Needs Action</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Donors</h3>
+                        <div class="value" id="stat-total">1,240</div>
+                        <div class="trend up">▲ 5 new today</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Pending Requests</h3>
+                        <div class="value" id="stat-requests">8</div>
+                        <div class="trend">Urgent</div>
+                    </div>
+                </div>
+
+                <div class="charts-row">
+                    <div class="chart-container">
+                        <h3>Donation Trends (Weekly)</h3>
+                        <canvas id="donationChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Inventory Distribution</h3>
+                        <canvas id="inventoryChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: Smart Scanner -->
+            <section id="view-scanner" class="view-section">
+                <header class="section-header">
+                    <h1>Smart Donor Scanner</h1>
+                </header>
+
+                <div class="scanner-layout">
+                    <div class="scanner-box">
+                        <div id="reader" style="width: 100%;"></div>
+                        <p class="scanner-instruction">Point camera at Donor's Digital ID or upload QR image.</p>
+                    </div>
+
+                    <div class="scan-result-card" id="scan-result" style="display: none;">
+                        <div class="result-header">
+                            <div class="donor-avatar">👤</div>
+                            <div>
+                                <h2 id="donor-name">Loading...</h2>
+                                <div class="donor-id" id="donor-id">ID: ...</div>
+                            </div>
+                            <div class="blood-badge" id="donor-blood">A+</div>
+                        </div>
+
+                        <div class="medical-check">
+                            <div class="check-item">
+                                <span class="label">Last Donation:</span>
+                                <span class="value" id="donor-last-date">...</span>
+                            </div>
+                            <div class="check-item">
+                                <span class="label">Eligibility:</span>
+                                <span class="status-tag" id="donor-status">Checking...</span>
+                            </div>
+                        </div>
+
+                        <div class="medical-notes alert" id="medical-notes-box" style="display: none;">
+                            <strong>⚠️ Medical Notice:</strong>
+                            <p id="medical-notes-text">High blood pressure medication.</p>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button class="btn-confirm" onclick="confirmDonation()">✅ Confirm Donation</button>
+                            <button class="btn-reject" onclick="rejectDonation()">❌ Reject / Defer</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: Inventory Control -->
+            <section id="view-inventory" class="view-section">
+                <header class="section-header">
+                    <h1>Blood Inventory Control</h1>
+                </header>
+
+                <div class="inventory-grid" id="admin-inventory-grid">
+                    <!-- Injected by JS -->
+                </div>
+            </section>
+
+            <!-- VIEW: Emergency Broadcast -->
+            <section id="view-broadcast" class="view-section">
+                <header class="section-header">
+                    <h1>Emergency Broadcast System</h1>
+                </header>
+
+                <div class="broadcast-panel">
+                    <div class="alert-box">
+                        <h3>⚠️ Send Urgent Request</h3>
+                        <p>This will send SMS/Push Notification to all eligible donors of the selected blood type.</p>
+
+                        <form id="broadcastForm" onsubmit="handleBroadcast(event)">
+                            <div class="form-group">
+                                <label>Required Blood Type</label>
+                                <div class="blood-selector">
+                                    <label><input type="radio" name="btype" value="A+"> A+</label>
+                                    <label><input type="radio" name="btype" value="O-"> O-</label>
+                                    <label><input type="radio" name="btype" value="B+"> B+</label>
+                                    <label><input type="radio" name="btype" value="AB-"> AB-</label>
+                                    <!-- Add others -->
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Hospital / Location</label>
+                                <input type="text" class="form-control" value="Sharyan Central Hospital" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Urgency Level</label>
+                                <select class="form-control">
+                                    <option>High (Need within 2 hrs)</option>
+                                    <option>Critical (Immediate)</option>
+                                    <option>Normal (Replenish stock)</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-broadcast">🚀 LAUNCH BROADCAST</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Init Firebase -->
+    <script type="module" src="firebase-init.js"></script>
+    <script type="module" src="admin.js"></script>
+</body>
+
+</html>
