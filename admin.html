@@ -218,9 +218,19 @@
                 </header>
 
                 <div class="scanner-layout">
-                    <div class="scanner-box">
-                        <div id="reader" style="width: 100%;"></div>
-                        <p class="scanner-instruction">Point camera at Donor's Digital ID or upload QR image.</p>
+                    <div class="scanner-box"
+                        style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0f172a; min-height: 350px;">
+                        <div id="reader" style="width: 100%; border:none;"></div>
+                        <div id="setup-camera-msg" style="padding: 40px; text-align: center; color: white;">
+                            <div style="font-size: 48px; margin-bottom: 20px;">📷</div>
+                            <h3 style="margin-bottom: 10px;">Camera Access Required</h3>
+                            <p style="font-size: 14px; opacity: 0.8; margin-bottom: 25px;">Please grant camera
+                                permission to scan donor IDs.</p>
+                            <button onclick="startScanner()"
+                                style="background: #dc2626; color: white; border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 16px; box-shadow: 0 10px 20px rgba(220, 38, 38, 0.3);">
+                                Allow & Start Scanner
+                            </button>
+                        </div>
                     </div>
 
                     <div class="scan-result-card" id="scan-result" style="display: none;">

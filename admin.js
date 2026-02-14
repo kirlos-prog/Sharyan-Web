@@ -112,19 +112,19 @@ async function loadActivityLog() {
 }
 
 // ------ NAVIGATION (With Permission Guard) ------
-window.showView = (viewName) => {
+window.showView = async (viewName) => {
     // Permission Check
     if (window.userPerms && !window.userPerms.includes(viewName)) {
         console.warn("Unauthorized view access:", viewName);
         return;
     }
 
-    if (viewName === 'staff') loadStaffList();
-    if (viewName === 'activity-log') loadActivityLog();
-
     // Hide all sections
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+    if (viewName === 'staff') loadStaffList();
+    if (viewName === 'activity-log') loadActivityLog();
 
     // Show target
     const target = document.getElementById(`view-${viewName}`);
@@ -133,10 +133,18 @@ window.showView = (viewName) => {
 
         // Match sidebar highlighting
         document.querySelectorAll('.nav-item').forEach(btn => {
-            if (btn.getAttribute('onclick').includes(`'${viewName}'`)) {
+            if (btn.getAttribute('onclick')?.includes(`'${viewName}'`)) {
                 btn.classList.add('active');
             }
         });
+
+        // --- SCANNER LIFECYCLE (MUST BE AFTER VISIBILITY) ---
+        if (viewName === 'scanner') {
+            console.log("Starting scanner for active view...");
+            setTimeout(() => startScanner(), 100); // Tiny delay ensures DOM layout
+        } else {
+            stopScanner();
+        }
     }
 };
 
@@ -194,39 +202,75 @@ window.updateStock = async (id, change) => {
 // ------ SMART SCANNER ------
 let html5QrcodeScanner;
 
-function initializeScanner() {
-    // Only init when tab is shown to save camera
-    // For demo, we just create the object
-}
+async function startScanner() {
+    const readerDiv = document.getElementById('reader');
+    const promptMsg = document.getElementById('setup-camera-msg');
 
-// Function triggered when "Start Camera" is requested (or automatically)
-function startScanner() {
+    // Check for Secure Context (HTTPS or localhost)
+    if (!window.isSecureContext) {
+        alert("🚨 Security Block: Camera only works on HTTPS or Localhost. If you are opening the file directly from your computer (file://), it will NOT work. Please use a local server like VS Code Live Server.");
+        return;
+    }
+
+    if (promptMsg) promptMsg.style.display = 'none';
+    if (!readerDiv) return;
+
+    // Clear previous instance if any
+    if (html5QrcodeScanner) {
+        try {
+            await html5QrcodeScanner.clear();
+        } catch (e) {
+            console.error("Error clearing scanner:", e);
+        }
+    }
+
     const onScanSuccess = async (decodedText, decodedResult) => {
-        // Handle the scanned code
         console.log(`Scan result: ${decodedText}`);
 
-        // Stop scanning
-        // html5QrcodeScanner.clear();
-
-        // Parse User ID from "Sharyan-User-12345"
-        // For demo: we expect just the ID or the full string
+        // Parse User ID
         let userId = decodedText.replace('Sharyan-User-', '');
 
-        // Fetch User Data from Firestore
-        const userRef = doc(db, "users", userId);
-        const userSnap = await getDoc(userRef);
+        try {
+            const userRef = doc(db, "users", userId);
+            const userSnap = await getDoc(userRef);
 
-        if (userSnap.exists()) {
-            const user = userSnap.data();
-            showScanResult(user, userId);
-        } else {
-            alert("User not found in database!");
+            if (userSnap.exists()) {
+                const user = userSnap.data();
+                showScanResult(user, userId);
+            } else {
+                alert("Donor not found! This QR might be invalid.");
+            }
+        } catch (e) {
+            console.error("Firestore error:", e);
         }
     };
 
-    html5QrcodeScanner = new Html5QrcodeScanner(
-        "reader", { fps: 10, qrbox: 250 });
-    html5QrcodeScanner.render(onScanSuccess);
+    try {
+        html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader",
+            {
+                fps: 10,
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0
+            },
+            /* verbose= */ false
+        );
+        html5QrcodeScanner.render(onScanSuccess);
+    } catch (e) {
+        console.error("Scanner init error:", e);
+        readerDiv.innerHTML = `<div style="padding:20px; color:red;">Camera Error: Please ensure you are using HTTPS and have granted permissions.</div>`;
+    }
+}
+
+async function stopScanner() {
+    if (html5QrcodeScanner) {
+        try {
+            await html5QrcodeScanner.clear();
+            html5QrcodeScanner = null;
+        } catch (e) {
+            console.warn("Failed to stop scanner:", e);
+        }
+    }
 }
 
 function showScanResult(user, id) {
