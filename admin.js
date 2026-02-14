@@ -201,39 +201,55 @@ window.handleAddStaff = async (e) => {
 
     // Get form data
     const name = form.name.value;
+    const email = form.email.value;
     const civilId = form.id.value;
     const password = form.password.value;
     const role = form.role.value;
 
     try {
+        const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js");
+        const { getAuth, createUserWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js");
         const { setDoc, doc, getDoc } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
 
-        // Check if exists first
-        const userRef = doc(db, "users", civilId);
-        const exists = await getDoc(userRef);
+        // 1. Check if ID exists in Firestore
+        // (Optional: You might want to check email too, but Auth handles that)
+        // We use civilId as key? Or UID? 
+        // Best practice with Auth is to use UID as key.
+        // But for "legacy" staff check, we can just proceed.
+        // Actually, let's just create user.
 
-        if (exists.exists()) {
-            alert("This ID is already registered!");
-            return;
-        }
+        // 2. Create Auth User (using Secondary App to avoid logout)
+        const secondaryApp = initializeApp(window.sharyan.app.options, "Secondary");
+        const secondaryAuth = getAuth(secondaryApp);
 
-        // Create Staff User
-        await setDoc(userRef, {
+        const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+        const uid = userCredential.user.uid;
+
+        // Cleanup secondary app
+        // secondaryApp.delete(); 
+
+        // 3. Create Staff Profile in Firestore
+        await setDoc(doc(db, "users", uid), {
             name: name,
+            email: email,
             civilId: civilId,
-            password: password, // In production, use Firebase Auth email/pass!
             role: role,
+            uid: uid,
             createdAt: new Date(),
             managedBy: "admin"
         });
 
-        alert(`Success! ${name} has been added as ${role}.`);
+        alert(`Success! Staff created.\nLogin: ${email}\nPass: ${password}`);
         form.reset();
         loadStaffList(); // Refresh list
 
     } catch (error) {
         console.error("Error adding staff:", error);
-        alert("Error saving staff to database.");
+        if (error.code === 'auth/email-already-in-use') {
+            alert("This ID is already registered as a User Account!");
+        } else {
+            alert("Error: " + error.message);
+        }
     }
 };
 

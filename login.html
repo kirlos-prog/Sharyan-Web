@@ -239,14 +239,13 @@
             <!-- Login Form -->
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="input-group">
-                    <label style="display: block; margin-bottom: 8px; font-size: 14px; color: #64748b;">Civil ID (الرقم
-                        المدني)</label>
-                    <input type="text" placeholder="Enter your 12-digit ID" class="gateway-input" required
-                        pattern="[0-9]{12,14}" title="Please enter 12-14 digits">
+                    <label style="display: block; margin-bottom: 8px; font-size: 14px; color: #64748b;">Email
+                        Address</label>
+                    <input type="email" id="loginEmail" placeholder="name@example.com" class="gateway-input" required>
                 </div>
                 <div class="input-group">
                     <label style="display: block; margin-bottom: 8px; font-size: 14px; color: #64748b;">Password</label>
-                    <input type="password" placeholder="••••••••" class="gateway-input" required>
+                    <input type="password" id="loginPassword" placeholder="••••••••" class="gateway-input" required>
                 </div>
                 <div style="text-align: right; margin-bottom: 20px;">
                     <a href="#" style="font-size: 12px; color: #dc2626; text-decoration: none;">Forgot Password?</a>
@@ -258,6 +257,10 @@
             <form id="signupForm" class="hidden" onsubmit="handleSignup(event)">
                 <div class="input-group">
                     <input type="text" id="regName" placeholder="Full Name" class="gateway-input" required>
+                </div>
+
+                <div class="input-group">
+                    <input type="email" id="regEmail" placeholder="Email Address" class="gateway-input" required>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -288,6 +291,11 @@
                             <option value="O-">O-</option>
                         </select>
                     </div>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="regPassword" placeholder="Create Password" class="gateway-input" required
+                        minlength="6">
                 </div>
 
                 <div class="input-group">
@@ -334,54 +342,65 @@
             }, 5000);
         }
 
+        // 🔐 REAL SECURE LOGIN
         async function handleLogin(e) {
             e.preventDefault();
-            const civilId = document.querySelector('input[placeholder="Enter your 12-digit ID"]').value;
-            const password = document.querySelector('input[type="password"]').value;
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
 
             try {
+                const { signInWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js");
                 const { getDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+                const auth = window.sharyan.auth;
                 const db = window.sharyan.db;
 
-                // Check Firestore for this user
-                const userDoc = await getDoc(doc(db, "users", civilId));
+                // 1. Authenticate with Firebase Server
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const uid = userCredential.user.uid;
+
+                // 2. Get User Profile
+                const userDoc = await getDoc(doc(db, "users", uid));
 
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
-                    // Simple password check (In production: Use Firebase Auth!)
-                    if (userData.password === password) {
-                        localStorage.setItem('sharyan_user', JSON.stringify({
-                            loggedIn: true,
-                            ...userData
-                        }));
 
-                        // Smart Routing based on Role 🧠
-                        const staffRoles = ['admin', 'doctor', 'staff', 'receptionist'];
-                        if (staffRoles.includes(userData.role)) {
-                            window.location.href = 'admin.html'; // Go to Command Center
-                        } else {
-                            window.location.href = 'index.html'; // Go to Donor Dashboard
-                        }
+                    // Save Session locally for UI speed
+                    localStorage.setItem('sharyan_user', JSON.stringify({
+                        loggedIn: true,
+                        uid: uid,
+                        ...userData
+                    }));
+
+                    // 3. Smart Routing 🧠
+                    const staffRoles = ['admin', 'doctor', 'staff', 'receptionist'];
+                    if (staffRoles.includes(userData.role)) {
+                        window.location.href = 'admin.html';
                     } else {
-                        showToast("Login Failed", "Incorrect password.", true);
+                        window.location.href = 'index.html';
                     }
                 } else {
-                    showToast("Login Failed", "User not found. Please register.", true);
+                    showToast("Login Error", "Profile not found. Contact Admin.", true);
                 }
             } catch (error) {
                 console.error("Login Error:", error);
-                showToast("System Error", "Could not connect to database.", true);
+                if (error.code === 'auth/invalid-credential') {
+                    showToast("Login Failed", "Wrong Email or Password.", true);
+                } else {
+                    showToast("System Error", error.message, true);
+                }
             }
         }
 
+        // 📝 REAL SECURE SIGNUP
         async function handleSignup(e) {
             e.preventDefault();
 
             const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
             const civilId = document.getElementById('regCivilId').value;
             const age = parseInt(document.getElementById('regAge').value);
             const bloodType = document.getElementById('regBloodType').value;
-            const password = "password123"; // simulating password for now since form doesn't have it
+            const password = document.getElementById('regPassword').value;
 
             if (age < 18) {
                 showToast("Age Restriction", "Sorry, donors must be 18 years or older.", true);
@@ -389,32 +408,42 @@
             }
 
             try {
+                const { createUserWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js");
                 const { setDoc, doc } = await import("https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js");
+                const auth = window.sharyan.auth;
                 const db = window.sharyan.db;
 
-                // Create User in Firestore (ID = Civil ID)
+                // 1. Create Secure Account on Google Logic
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const uid = userCredential.user.uid;
+
+                // 2. Create Public Profile in Firestore
                 const userData = {
                     name: name,
+                    email: email, // Save email in profile too
                     civilId: civilId,
                     age: age,
                     bloodType: bloodType,
-                    password: password, // Demo only
                     role: 'donor',
+                    uid: uid, // Link to Auth
                     createdAt: new Date(),
                     lastDonation: null
                 };
 
-                await setDoc(doc(db, "users", civilId), userData);
+                // Saving with UID as document key is safer
+                await setDoc(doc(db, "users", uid), userData);
 
-                // Save session
+                // 3. Save Session & Redirect
                 localStorage.setItem('sharyan_user', JSON.stringify({ loggedIn: true, ...userData }));
-
-                // Redirect
                 window.location.href = 'index.html?view=digital-id';
 
             } catch (error) {
                 console.error("Signup Error:", error);
-                showToast("Registration Failed", "Could not save user. Check console.", true);
+                if (error.code === 'auth/email-already-in-use') {
+                    showToast("Registration Failed", "This Email is already registered.", true);
+                } else {
+                    showToast("Registration Failed", error.message, true);
+                }
             }
         }
 
